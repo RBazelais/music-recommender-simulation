@@ -47,14 +47,29 @@ class Recommender:
         # TODO: Implement explanation logic
         return "Explanation placeholder"
 
-def load_songs(csv_path: str) -> List[Dict]:
+def load_songs(csv_path: str) -> List[Song]:
     """
-    Loads songs from a CSV file.
+    Loads songs from a CSV file and returns a list of Song objects.
     Required by src/main.py
     """
-    # TODO: Implement CSV loading logic
-    print(f"Loading songs from {csv_path}...")
-    return []
+    import csv
+    songs = []
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            songs.append(Song(
+                id=int(row["id"]),
+                title=row["title"],
+                artist=row["artist"],
+                genre=row["genre"],
+                mood=row["mood"],
+                energy=float(row["energy"]),
+                tempo_bpm=float(row["tempo_bpm"]),
+                valence=float(row["valence"]),
+                danceability=float(row["danceability"]),
+                acousticness=float(row["acousticness"]),
+            ))
+    return songs
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
     """
