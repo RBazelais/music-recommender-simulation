@@ -126,11 +126,18 @@ def load_songs(csv_path: str) -> List[Song]:
             ))
     return songs
 
-def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
+def recommend_songs(user_prefs: Dict, songs: List[Song], k: int = 5) -> List[Tuple[Song, float, str]]:
     """
-    Functional implementation of the recommendation logic.
+    Functional wrapper around the Recommender class.
+    Converts a raw user_prefs dict into a UserProfile and returns ranked results.
     Required by src/main.py
     """
-    # TODO: Implement scoring and ranking logic
-    # Expected return format: (song_dict, score, explanation)
-    return []
+    user = UserProfile(
+        favorite_genres=user_prefs.get("genres", [user_prefs.get("genre", "")]),
+        favorite_mood=user_prefs.get("mood", ""),
+        target_energy=user_prefs.get("energy", 0.5),
+        likes_acoustic=user_prefs.get("likes_acoustic", False),
+    )
+    rec = Recommender(songs)
+    top_songs = rec.recommend(user, k=k)
+    return [(song, score_song(song, user), rec.explain_recommendation(user, song)) for song in top_songs]
