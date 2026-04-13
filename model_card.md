@@ -8,7 +8,7 @@ Songs & Vibes 1.0
 
 ## 2. Intended Use
 
-Songs & Vibes is a content-based music recommender designed for classroom exploration. It suggests up to 5 songs from a small catalog based on a user's preferred genres, mood, energy level, and acoustic taste. It is not intended for production use — the catalog is tiny and the scoring logic is intentionally simple to make the system easy to understand and modify.
+Songs & Vibes is a content-based music recommender designed for classroom exploration. It suggests up to 5 songs from a small catalog based on a user's preferred genres, mood, energy level, and acoustic taste. It is not intended for production use; the catalog is tiny and the scoring logic is intentionally simple to make the system easy to understand and modify.
 
 ---
 
@@ -44,18 +44,18 @@ The catalog was expanded from 10 to 22 songs to improve recommendation diversity
 
 - Works well for users with clear genre preferences (e.g., lofi or pop), since genre carries the highest weight.
 - The cold-start flow means even a brand-new user gets reasonable results before any history exists.
-- Scoring is fully transparent — every point added to a song's score has a direct, human-readable reason.
+- Scoring is fully transparent: every point added to a song's score has a direct, human-readable reason.
 - The `explain_recommendation` function surfaces exactly why each song was recommended, which mirrors what Pandora does with its Music Genome annotations.
 
 ---
 
 ## 6. Limitations and Bias
 
-- **Small catalog**: With only 22 songs, diversity is limited — for niche genres (e.g., metal, country) there may only be 1–2 candidates, making it hard to return a meaningful top-5.
+- **Small catalog**: With only 22 songs, diversity is limited; for niche genres (e.g., metal, country) there may only be 1–2 candidates, making it hard to return a meaningful top-5.
 - **No collaborative filtering**: The system cannot learn from what other similar users liked, which is how most real recommenders improve over time.
 - **Energy is the only continuous feature used in scoring**: Tempo, valence, and danceability are present in the data but not weighted in `score_song`, so two songs with very different feels can receive identical scores.
 - **Genre bias**: Because genre adds 3 points and mood adds 2, a song in the right genre will almost always outrank a song in the wrong genre regardless of every other feature.
-- **Acoustic preference is binary**: Users either like acoustic music or they don't — there is no spectrum, which flattens real taste.
+- **Acoustic preference is binary**: Users either like acoustic music or they don't; there is no spectrum, which flattens real taste.
 - **Cold-start popularity proxy is rough**: Popularity is estimated as `energy × 0.6 + danceability × 0.4`, which biases bootstrap recommendations toward high-energy tracks and may alienate users who prefer calm music from the start.
 
 ---
@@ -66,8 +66,8 @@ The system was tested with several synthetic user profiles:
 
 | Profile | Expected top results | Actual behavior |
 | --- | --- | --- |
-| Lofi chill fan, low energy, acoustic | Library Rain, Midnight Coding, Focus Flow | Correct — lofi songs ranked highest |
-| Pop/rock fan, high energy, not acoustic | Gym Hero, Storm Runner, Sunrise City | Correct — pop and rock dominated |
+| Lofi chill fan, low energy, acoustic | Library Rain, Midnight Coding, Focus Flow | Correct: lofi songs ranked highest |
+| Pop/rock fan, high energy, not acoustic | Gym Hero, Storm Runner, Sunrise City | Correct: pop and rock dominated |
 | Jazz/ambient, relaxed mood | Coffee Shop Stories, Spacewalk Thoughts | Correct, though catalog is thin |
 | Cold-start user who dislikes all bootstrap songs | Should surface unseen songs only | Dislike penalty (−10) correctly excludes them |
 
@@ -78,7 +78,7 @@ No numeric accuracy metric was used, but the score outputs were inspected manual
 ## 8. Future Work
 
 - **Expand the catalog** to at least 100 songs so diversity in recommendations is meaningful.
-- **Add collaborative filtering**: if two users liked the same 3 songs, recommend what the other liked next — this is how Spotify's "Discover Weekly" works.
+- **Add collaborative filtering**: if two users liked the same 3 songs, recommend what the other liked next; this is how Spotify's "Discover Weekly" works.
 - **Use more audio features in scoring**: valence and tempo are already in the data and could be weighted to distinguish an upbeat pop song from a sad one with the same genre label.
 - **Soften the acoustic preference** from a binary flag to a continuous weight so users can prefer "somewhat acoustic" rather than just yes or no.
 - **Add diversity constraints** so the top 5 results don't all come from the same genre.
