@@ -102,6 +102,72 @@ class Recommender:
 
         return "Recommended because it " + ", and ".join(reasons) + "."
 
+def get_unique_genres(songs: List[Song]) -> List[str]:
+    """Returns a sorted list of all unique genres in the catalog."""
+    return sorted(set(song.genre for song in songs))
+
+
+def onboard_user(selected_genres: List[str]) -> UserProfile:
+    """
+    Cold-start step 1: Build an initial UserProfile from genre selections.
+    In a real app this would come from a UI. Here we accept the list directly.
+    """
+    return UserProfile(
+        favorite_genres=selected_genres,
+        favorite_mood="",
+        target_energy=0.65,
+        likes_acoustic=False,
+    )
+
+
+def get_popular_songs_by_genre(songs: List[Song], genres: List[str], k: int = 5) -> List[Song]:
+    """
+    Cold-start step 2: Bootstrap recommendations using popular songs
+    from the user's selected genres before any feedback exists.
+
+    'Popularity' is approximated by energy + danceability — high-engagement
+    signals that real platforms use when no interaction data is available.
+    """
+    matches = [s for s in songs if s.genre in genres]
+    ranked = sorted(matches, key=lambda s: s.energy * 0.6 + s.danceability * 0.4, reverse=True)
+    return ranked[:k]
+
+
+def collect_feedback(user: UserProfile, song: Song, liked: bool) -> None:
+    """
+    Cold-start step 3: Record a thumbs up or thumbs down on a song.
+    Mutates the UserProfile in place.
+    """
+    if liked:
+        if song.id not in user.liked_song_ids:
+            user.liked_song_ids.append(song.id)
+    else:
+        if song.id not in user.disliked_song_ids:
+            user.disliked_song_ids.append(song.id)
+
+
+def refine_user_profile(user: UserProfile, songs: List[Song]) -> None:
+    """
+    Cold-start step 4: After collecting feedback, update the UserProfile
+    to reflect what the user actually responded to.
+
+    Averages the audio features of liked songs to build a more accurate
+    taste profile — the same approach Pandora uses when adjusting gene weights.
+    """
+    liked = [s for s in songs if s.id in user.liked_song_ids]
+    if not liked:
+        return
+
+    user.target_energy = sum(s.energy for s in liked) / len(liked)
+    user.likes_acoustic = (sum(s.acousticness for s in liked) / len(liked)) > 0.5
+
+    liked_genres = [s.genre for s in liked]
+    user.favorite_genres = list(set(liked_genres))
+
+    liked_moods = [s.mood for s in liked]
+    user.favorite_mood = max(set(liked_moods), key=liked_moods.count)
+
+
 def load_songs(csv_path: str) -> List[Song]:
     """
     Loads songs from a CSV file and returns a list of Song objects.
